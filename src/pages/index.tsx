@@ -7,6 +7,7 @@ import { useStacks } from "../providers/StacksProvider";
 
 export default function Home() {
   const { network, address } = useStacks();
+  const [transactionOptions, setTransactionOptions] = useState<ContractCallRegularOptions | undefined>(undefined);
   const [transactionId, setTransactionId] = useState<string | undefined>(undefined)
   const [transactionJson, setTransactionJson] = useState<any>(undefined)
 
@@ -23,6 +24,12 @@ export default function Home() {
   useEffect(() => {
     fetchTransactionJson()
   }, [transactionId])
+
+  useEffect(() => {
+    (BigInt.prototype as any).toJSON = function () {
+      return this.toString();
+    };
+  }, [])
 
   const mintTokens = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
@@ -44,6 +51,8 @@ export default function Home() {
       },
     }
 
+    setTransactionOptions(options)
+
     await openContractCall(options)
   }
 
@@ -56,6 +65,10 @@ export default function Home() {
       <p>
         {transactionId ? `Transaction ID: ${transactionId}` : 'No transaction ID yet'}
       </p>
+
+      <pre className="whitespace-pre">
+        {transactionOptions ? JSON.stringify(transactionOptions, null, 2) : 'No transaction options yet'}
+      </pre>
 
       <pre className="whitespace-pre">
         {transactionJson ? JSON.stringify(transactionJson, null, 2) : 'No transaction JSON yet'}
